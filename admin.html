@@ -21,7 +21,7 @@
   <label>GitHub Token</label>
   <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
   <label>Owner (username GitHub)</label>
-  <input type="text" id="owner" placeholder="vd: yourname">
+  <input type="text" id="owner" placeholder="vd: tokimthanh08">
   <label>Repo name</label>
   <input type="text" id="repo" placeholder="vd: prompt-video-library">
   <label>Branch</label>
@@ -46,8 +46,13 @@
   <label>Tags (cách nhau bằng dấu phẩy)</label>
   <input type="text" id="f-tags" placeholder="catwalk, silk, studio">
 
-  <label>Collection</label>
-  <input type="text" id="f-collection" placeholder="Váy dạ hội">
+  <label>Collection (Phân loại) *</label>
+  <select id="f-collection" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #0f0f12; color: #fff; font-size: 16px; margin-bottom: 10px;">
+    <option value="Quần">Quần</option>
+    <option value="Áo">Áo</option>
+    <option value="Đầm">Đầm (dài/ngắn)</option>
+    <option value="Váy">Váy (dài/ngắn)</option>
+  </select>
 
   <label>AI Model (không bắt buộc)</label>
   <input type="text" id="f-ai" placeholder="Runway Gen-3">
