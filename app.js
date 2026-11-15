@@ -4,7 +4,6 @@ async function loadPrompts() {
   try {
     const res = await fetch('data/prompts.json?v=' + Date.now());
     allPrompts = await res.json();
-    populateFilters();
     render(allPrompts);
   } catch {
     document.getElementById('grid').innerHTML =
@@ -12,21 +11,11 @@ async function loadPrompts() {
   }
 }
 
-function populateFilters() {
-  const sel = document.getElementById('filter-collection');
-  const set = [...new Set(allPrompts.map(p => p.collection).filter(Boolean))];
-  set.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c; o.textContent = c;
-    sel.appendChild(o);
-  });
-}
-
 function render(list) {
   const grid = document.getElementById('grid');
   grid.innerHTML = list.length
     ? ''
-    : '<p style="padding:20px">Không có prompt.</p>';
+    : '<p style="padding:20px">Không có prompt nào trong danh mục này.</p>';
   list.forEach(p => grid.appendChild(card(p)));
 }
 
@@ -116,13 +105,15 @@ const esc = s => String(s).replace(/[&<>"']/g,
 function filter() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   const c = document.getElementById('filter-collection').value;
+  
   render(allPrompts.filter(p => {
     const hitQ = !q ||
       (p.title || '').toLowerCase().includes(q) ||
       (p.promptEn || '').toLowerCase().includes(q) ||
       (p.promptVi || '').toLowerCase().includes(q) ||
       (p.tags || []).some(t => t.toLowerCase().includes(q));
-    return hitQ && (!c || p.collection === c);
+    const hitC = !c || p.collection === c;
+    return hitQ && hitC;
   }));
 }
 
