@@ -46,5 +46,17 @@
     "video": "media/videos/1794893639478.mp4",
     "thumb": "media/thumbs/1794893639478.jpg",
     "createdAt": "2026-11-17T05:34:06.672Z"
+  },
+  {
+    "id": "1794894918072",
+    "title": "Thay phông nền",
+    "promptEn": "",
+    "promptVi": "Không tự ý thêm đồ vật, loại bỏ nội thất hoặc sáng tạo lại thiết kế căn phòng nếu không cần thiết.\n3. KỸ THUẬT GHÉP ẢNH CHÂN THỰC\n•\tTách người mẫu khỏi phông nền cũ với đường viền chính xác.\n•\tGiữ nguyên từng sợi tóc, tóc con và các chi tiết nhỏ quanh cơ thể.\n•\tKhông tạo viền trắng, viền đen hoặc quầng sáng quanh người mẫu.\n•\tKhông làm mất chi tiết ở tay, ngón tay, chân, tóc và trang phục.\n•\tĐiều chỉnh vị trí và kích thước người mẫu sao cho phù hợp với phối cảnh hình 2, nhưng không làm biến dạng cơ thể.\n•\tĐồng bộ ánh sáng giữa người mẫu và môi trường mới một cách tự nhiên.\n•\tTạo bóng đổ tiếp xúc dưới chân và bóng môi trường hợp lý.\n•\tCân bằng nhiệt độ màu và độ sáng tổng thể để người mẫu hòa nhập với không gian.\n•\tGiữ độ sâu trường ảnh và cảm giác không gian chân thực.\n•\tKhông để người mẫu có cảm giác bị dán lên phông nền.\nLưu ý: Chỉ được điều chỉnh ánh sáng môi trường ở mức cần thiết để hòa hợp với phông nền. Không thay đổi màu da, makeup, màu tóc hoặc màu sắc trang phục.\n4. NHỮNG ĐIỀU TUYỆT ĐỐI KHÔNG ĐƯỢC PHÉP\n•\tKhông thay đổi gương mặt hoặc tạo ra một người mẫu khác.\n•\tKhông thay đổi biểu cảm hoặc hướng nhìn.\n•\tKhông thay đổi kiểu tóc, độ dài tóc và màu tóc.\n•\tKhông thay đổi tông trang điểm.\n•\tKhông làm trắng da, đổi màu da hoặc chỉnh màu da quá mức.\n•\tKhông thay đổi vóc dáng hoặc tỷ lệ cơ thể.\n•\tKhông thay đổi trang phục và phụ kiện.\n•\tKhông tự ý thay đổi tư thế.\n•\tKhông thêm người khác vào ảnh.\n•\tKhông tạo thêm tay, chân, ngón tay hoặc bộ phận cơ thể.\n•\tKhông làm méo đồ nội thất hoặc sai phối cảnh.\n•\tKhông áp dụng bộ lọc làm đẹp, phong cách hoạt hình, CGI hoặc hiệu ứng AI giả tạo.\n5. CHẤT LƯỢNG HÌNH ẢNH ĐẦU RA\n•\tTỷ lệ khung hình: 9:16 (dọc).\n•\tĐộ phân giải mục tiêu: 4K – 2160 × 3840 pixels.\n•\tChất lượng hình ảnh siêu chân thực (Ultra Photorealistic).\n•\tChi tiết sắc nét, rõ ràng, không nhòe hoặc bệt hình.\n•\tMàu sắc tự nhiên, cân bằng ánh sáng chuyên nghiệp.\n•\tKết cấu da, tóc và vải chân thực.\n•\tKhông nhiễu hạt, không vỡ hình, không xuất hiện lỗi AI.\n•\tBố cục hài hòa, phù hợp làm ảnh thời trang và nội dung TikTok.\n6. ƯU TIÊN XỬ LÝ\nƯU TIÊN SỐ 1: Bảo toàn nguyên vẹn người mẫu gốc từ hình 1.\nƯU TIÊN SỐ 2: Tái tạo chính xác phông nền từ hình 2.\nƯU TIÊN SỐ 3: Ghép hai hình thành một bức ảnh thống nhất, tự nhiên và chân thực.\nNếu có bất kỳ xung đột nào giữa việc tái tạo hình ảnh và bảo toàn người mẫu, hãy ưu tiên giữ nguyên người mẫu gốc, không hy sinh danh tính, gương mặt, trang phục hoặc vóc dáng để đổi lấy hiệu ứng thẩm mỹ.\nKẾT QUẢ CUỐI CÙNG: Một bức ảnh thời trang chân thực, trong đó người mẫu được giữ nguyên diện mạo như hình 1, chỉ thay đổi không gian phông nền theo hình 2, không có cảm giác chỉnh sửa hoặc ghép ảnh bằng AI.",
+    "tags": [],
+    "collection": "Áo",
+    "aiModel": "",
+    "video": "media/videos/1794894918072.png",
+    "thumb": "",
+    "createdAt": "2026-11-17T05:55:22.685Z"
   }
 ]
