@@ -2,6 +2,7 @@ const $ = id => document.getElementById(id);
 let cfg = {};
 let prompts = [];
 let sha = null;
+let editingId = null; // Biến dùng để kiểm tra đang sửa hay thêm mới
 
 /* ========== AUTH ========== */
 function loadAuth() {
@@ -157,9 +158,7 @@ async function extractThumb(file) {
     v.src = URL.createObjectURL(file);
     v.muted = true;
     v.playsInline = true;
-    v.addEventListener('loadeddata', () => {
-      v.currentTime = 0.1;
-    });
+    v.addEventListener('loadeddata', () => { v.currentTime = 0.1; });
     v.addEventListener('seeked', () => {
       const c = document.createElement('canvas');
       c.width = v.videoWidth;
@@ -174,65 +173,107 @@ async function extractThumb(file) {
   });
 }
 
-/* ========== THÊM PROMPT ========== */
+/* ========== THÊM / SỬA PROMPT ========== */
 $('btn-add').onclick = async () => {
   const title = $('f-title').value.trim();
   const promptEn = $('f-en').value.trim();
   const promptVi = $('f-vi').value.trim();
   const tags = $('f-tags').value.split(',').map(s => s.trim()).filter(Boolean);
-  // Lấy giá trị từ ô Select
   const collection = $('f-collection').value; 
   const aiModel = $('f-ai').value.trim();
   const videoFile = $('f-video').files[0];
   const thumbFile = $('f-thumb').files[0];
 
-  if (!title || !videoFile) {
-    return setStatus('save-status', '❌ Cần tiêu đề và video', 'err');
+  if (!title) return setStatus('save-status', '❌ Cần nhập tiêu đề', 'err');
+  
+  // Nếu thêm mới thì bắt buộc phải có video, nếu Sửa thì không bắt buộc
+  if (!editingId && !videoFile) {
+    return setStatus('save-status', '❌ Cần chọn video cho prompt mới', 'err');
   }
-  if (videoFile.size > 5 * 1024 * 1024) {
-    return setStatus('save-status',
-      '❌ Video > 5MB. Nén nhỏ lại rồi thử lại.', 'err');
+  if (videoFile && videoFile.size > 5 * 1024 * 1024) {
+    return setStatus('save-status', '❌ Video > 5MB. Nén nhỏ lại rồi thử lại.', 'err');
   }
   if (!promptEn && !promptVi) {
     return setStatus('save-status', '❌ Cần ít nhất 1 prompt (EN hoặc VI)', 'err');
   }
 
-  const id = Date.now().toString();
-  const ext = videoFile.name.split('.').pop().toLowerCase();
-  const videoPath = `media/videos/${id}.${ext}`;
-
   try {
-    setProgress('Đang upload video...', 30);
-    await uploadFile(videoPath, videoFile);
-
-    let thumbPath = '';
-    if (thumbFile) {
-      setProgress('Đang upload thumbnail...', 60);
-      const tExt = thumbFile.name.split('.').pop().toLowerCase();
-      thumbPath = `media/thumbs/${id}.${tExt}`;
-      await uploadFile(thumbPath, thumbFile);
-    } else {
-      setProgress('Đang tạo thumbnail từ video...', 60);
-      const blob = await extractThumb(videoFile);
-      if (blob) {
-        thumbPath = `media/thumbs/${id}.jpg`;
-        await uploadFile(thumbPath,
-          new File([blob], `${id}.jpg`, { type: 'image/jpeg' }));
+    if (editingId) {
+      // ------ CHẾ ĐỘ SỬA ------
+      setProgress('Đang lưu thay đổi...', 50);
+      const index = prompts.findIndex(p => p.id === editingId);
+      if (index === -1) throw new Error("Không tìm thấy prompt gốc");
+      
+      const old = prompts[index];
+      
+      // Nếu có chọn video mới thì upload đè
+      if (videoFile) {
+        setProgress('Đang upload video mới...', 30);
+        const ext = videoFile.name.split('.').pop().toLowerCase();
+        const videoPath = `media/videos/${editingId}.${ext}`;
+        await uploadFile(videoPath, videoFile);
+        old.video = videoPath;
       }
+
+      // Nếu có chọn thumbnail mới thì upload đè
+      if (thumbFile) {
+        setProgress('Đang upload thumbnail mới...', 60);
+        const tExt = thumbFile.name.split('.').pop().toLowerCase();
+        const thumbPath = `media/thumbs/${editingId}.${tExt}`;
+        await uploadFile(thumbPath, thumbFile);
+        old.thumb = thumbPath;
+      }
+
+      // Cập nhật thông tin text
+      old.title = title;
+      old.promptEn = promptEn;
+      old.promptVi = promptVi;
+      old.tags = tags;
+      old.collection = collection;
+      old.aiModel = aiModel;
+
+      setProgress('Đang lưu dữ liệu...', 85);
+      await savePromptsJson();
+      
+      setStatus('save-status', '✅ Đã cập nhật prompt thành công!', 'ok');
+      cancelEdit(); // Reset form về trạng thái thêm mới
+
+    } else {
+      // ------ CHẾ ĐỘ THÊM MỚI ------
+      const id = Date.now().toString();
+      const ext = videoFile.name.split('.').pop().toLowerCase();
+      const videoPath = `media/videos/${id}.${ext}`;
+
+      setProgress('Đang upload video...', 30);
+      await uploadFile(videoPath, videoFile);
+
+      let thumbPath = '';
+      if (thumbFile) {
+        setProgress('Đang upload thumbnail...', 60);
+        const tExt = thumbFile.name.split('.').pop().toLowerCase();
+        thumbPath = `media/thumbs/${id}.${tExt}`;
+        await uploadFile(thumbPath, thumbFile);
+      } else {
+        setProgress('Đang tạo thumbnail từ video...', 60);
+        const blob = await extractThumb(videoFile);
+        if (blob) {
+          thumbPath = `media/thumbs/${id}.jpg`;
+          await uploadFile(thumbPath, new File([blob], `${id}.jpg`, { type: 'image/jpeg' }));
+        }
+      }
+
+      setProgress('Đang lưu dữ liệu...', 85);
+      prompts.push({
+        id, title, promptEn, promptVi, tags, collection, aiModel,
+        video: videoPath, thumb: thumbPath,
+        createdAt: new Date().toISOString()
+      });
+      await savePromptsJson();
+      setStatus('save-status', '✅ Đã thêm prompt mới thành công!', 'ok');
+      resetForm();
     }
 
-    setProgress('Đang lưu dữ liệu...', 85);
-    prompts.push({
-      id, title, promptEn, promptVi, tags, collection, aiModel,
-      video: videoPath, thumb: thumbPath,
-      createdAt: new Date().toISOString()
-    });
-    await savePromptsJson();
-
     setProgress('✅ Xong!', 100);
-    setStatus('save-status',
-      '✅ Đã thêm. Đợi ~30 giây GitHub Pages cập nhật rồi tải lại trang public.', 'ok');
-    resetForm();
     renderAdminList();
     setTimeout(() => $('progress').classList.add('hidden'), 2500);
   } catch (e) {
@@ -241,10 +282,25 @@ $('btn-add').onclick = async () => {
   }
 };
 
-function resetForm() {
-  ['f-title','f-en','f-vi','f-tags','f-ai','f-video','f-thumb']
-    .forEach(id => $(id).value = '');
+// Hàm hủy chế độ sửa, đưa form về trạng thái thêm mới
+function cancelEdit() {
+  editingId = null;
+  $('f-title').value = '';
+  $('f-en').value = '';
+  $('f-vi').value = '';
+  $('f-tags').value = '';
+  $('f-ai').value = '';
+  $('f-video').value = '';
+  $('f-thumb').value = '';
+  $('f-collection').value = 'Quần'; // Mặc định
+  
+  // Đổi lại text của nút bấm và tiêu đề form
+  $('btn-add').textContent = '➕ Thêm prompt';
+  $('btn-add').style.background = '#4f8';
+  document.querySelector('#form-section h2').textContent = '2. Thêm prompt mới';
 }
+
+function resetForm() { cancelEdit(); }
 
 function setProgress(msg, pct) {
   const p = $('progress');
@@ -259,7 +315,7 @@ function setStatus(id, msg, type) {
   el.className = 'status ' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : '');
 }
 
-/* ========== DANH SÁCH + XOÁ ========== */
+/* ========== DANH SÁCH + XOÁ + SỬA ========== */
 function renderAdminList() {
   const wrap = $('admin-list');
   if (!prompts.length) {
@@ -267,6 +323,7 @@ function renderAdminList() {
     return;
   }
   wrap.innerHTML = '';
+  
   prompts.forEach((p, i) => {
     const d = document.createElement('div');
     d.className = 'admin-item';
@@ -274,11 +331,16 @@ function renderAdminList() {
       <img src="${p.thumb || ''}" alt="">
       <div class="admin-item-info">
         <strong>${p.title}</strong>
-        <div class="tags"><span style="background:#333; padding:2px 6px; border-radius:4px;">${p.collection || 'Chưa phân loại'}</span> ${(p.tags || []).map(t => `<span>#${t}</span>`).join('')}</div>
+        <div class="tags"><span style="background:#333; padding:2px 6px; border-radius:4px;">${p.collection || 'Khác'}</span> ${(p.tags || []).map(t => `<span>#${t}</span>`).join('')}</div>
       </div>
-      <button class="btn-del" data-i="${i}">🗑 Xoá</button>`;
+      <div style="display:flex; gap:5px;">
+        <button class="btn-edit" data-i="${i}" style="background:#f90; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:bold;">✏️ Sửa</button>
+        <button class="btn-del" data-i="${i}">🗑 Xoá</button>
+      </div>`;
     wrap.appendChild(d);
   });
+
+  // Bắt sự kiện nút Xoá
   wrap.querySelectorAll('.btn-del').forEach(b => {
     b.onclick = async () => {
       const i = +b.dataset.i;
@@ -291,6 +353,35 @@ function renderAdminList() {
         prompts.splice(i, 0, removed);
         alert('Lỗi xoá: ' + e.message);
       }
+    };
+  });
+
+  // Bắt sự kiện nút Sửa
+  wrap.querySelectorAll('.btn-edit').forEach(b => {
+    b.onclick = () => {
+      const i = +b.dataset.i;
+      const p = prompts[i];
+      editingId = p.id; // Đánh dấu đang sửa ID này
+
+      // Điền dữ liệu cũ vào form
+      $('f-title').value = p.title || '';
+      $('f-en').value = p.promptEn || '';
+      $('f-vi').value = p.promptVi || '';
+      $('f-tags').value = (p.tags || []).join(', ');
+      $('f-collection').value = p.collection || 'Quần';
+      $('f-ai').value = p.aiModel || '';
+      
+      // Reset file input
+      $('f-video').value = '';
+      $('f-thumb').value = '';
+
+      // Đổi giao diện form sang chế độ sửa
+      $('btn-add').textContent = '💾 Lưu thay đổi';
+      $('btn-add').style.background = '#f90'; // Đổi màu cam để dễ phân biệt
+      document.querySelector('#form-section h2').textContent = '2. Sửa prompt: ' + p.title;
+
+      // Cuộn lên phần form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
   });
 }
